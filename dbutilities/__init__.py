@@ -1,15 +1,9 @@
 #!/usr/bin/env python
-from bottle_sqlalchemy import Plugin
-from sqlalchemy import create_engine, inspect
-from sqlalchemy.ext.declarative import declarative_base
-
-Base = declarative_base()
-engine = create_engine("sqlite:///:memory:", echo=True)
-sqlalchemy_plugin = Plugin(engine, Base.metadata, create=True)
+from sqlalchemy import inspect
 
 
 def row_as_dict(row):
-    """Transform a row from a table into a dict.
+    """Transform an SQLAlchemy Query row into a dict.
 
     Adapted from https://stackoverflow.com/a/37350445
     """

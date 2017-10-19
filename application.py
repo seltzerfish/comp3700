@@ -1,22 +1,28 @@
 #!/usr/bin/env python
 import bottle
-from bottle import template, static_file, route
+from bottle import template, static_file, view
+from bottle_sqlalchemy import Plugin
+from sqlalchemy import create_engine
 
 import dbutilities
 import dbutilities.lookup
+from model import Base
+
+engine = create_engine("sqlite:///database.db", echo=True)
+sqlalchemy_plugin = Plugin(engine, Base.metadata, create=True)
 
 app = bottle.Bottle()
-app.install(dbutilities.sqlalchemy_plugin)
+app.install(sqlalchemy_plugin)
 
 
-@app.route('/')
+@app.route("/")
 def index():
-    output = template('views/index.html')
-    return output
+    return template("index")
 
-@app.route('/views/:filename#.*#')
+
+@app.route("/static/<filename:path>")
 def send_static(filename):
-    return static_file(filename, root='./views/')
+    return static_file(filename, root='/static/')
 
 
 @app.get("/customer/<customer_id:int>")
@@ -80,6 +86,7 @@ def get_product(product, db):
         return dbutilities.row_as_dict(entity)
     else:
         return bottle.HTTPError(404, f"Product \"{product}\" not found.")
+
 
 if __name__ == "__main__":
     app.run(debug=True, port=8080, reloader=True)

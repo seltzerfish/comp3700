@@ -1,7 +1,8 @@
 #!/usr/bin/env python
 from sqlalchemy import func, Column, Integer, String, Numeric, ForeignKey, DateTime
+from sqlalchemy.ext.declarative import declarative_base
 
-from dbutilities import Base
+Base = declarative_base()
 
 
 class Employee(Base):
