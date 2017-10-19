@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 import bottle
+from bottle import template, static_file, route
 
 import dbutilities
 import dbutilities.lookup
@@ -8,10 +9,14 @@ app = bottle.Bottle()
 app.install(dbutilities.sqlalchemy_plugin)
 
 
-@app.route('/static/<path:path>')
-def static(path):
-    """Serve static content."""
-    return bottle.static_file(path, root='static/')
+@app.route('/')
+def index():
+    output = template('views/index.html')
+    return output
+
+@app.route('/views/:filename#.*#')
+def send_static(filename):
+    return static_file(filename, root='./views/')
 
 
 @app.get("/customer/<customer_id:int>")
@@ -75,3 +80,6 @@ def get_product(product, db):
         return dbutilities.row_as_dict(entity)
     else:
         return bottle.HTTPError(404, f"Product \"{product}\" not found.")
+
+if __name__ == "__main__":
+    app.run(debug=True, port=8080, reloader=True)
