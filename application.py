@@ -5,10 +5,11 @@ from bottle_sqlalchemy import Plugin
 from sqlalchemy import create_engine
 import db_utils
 from model import Base
+import os
 
+css_path = os.getcwd() + '/static/css'
 engine = create_engine("sqlite:///data.db", echo=True)
 sqlalchemy_plugin = Plugin(engine, Base.metadata, create=True)
-
 app = bottle.Bottle()
 app.install(sqlalchemy_plugin)
 
@@ -24,7 +25,7 @@ def modify():
 
 @app.route("/static/<filename>")
 def send_static(filename):
-    return static_file(filename, root='/Users/connerlane/git/school/comp3700/static/css')
+    return static_file(filename, root=css_path)
 
 
 if __name__ == "__main__":
