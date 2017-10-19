@@ -50,6 +50,15 @@ def get_employee(employee, db):
         return bottle.HTTPError(404, f"Employee \"{employee}\" not found.")
 
 
+@app.get("/order/<order_id:int>")
+def get_order(order_id, db):
+    entity = dbutilities.lookup.order_by_id(order_id, db)
+    if entity:
+        return dbutilities.row_as_dict(entity)
+    else:
+        return bottle.HTTPError(404, f"Product ID#{order_id} not found.")
+
+
 @app.get("/product/<product_id:int>")
 def get_product(product_id, db):
     entity = dbutilities.lookup.product_by_id(product_id, db)
@@ -59,16 +68,7 @@ def get_product(product_id, db):
         return bottle.HTTPError(404, f"Product ID#{product_id} not found.")
 
 
-@app.get("/product/<product_id:int>")
-def get_order(order_id, db):
-    entity = dbutilities.lookup.order_by_id(order_id, db)
-    if entity:
-        return dbutilities.row_as_dict(entity)
-    else:
-        return bottle.HTTPError(404, f"Product ID#{order_id} not found.")
-
-
-@app.get("/employee/name/<employee>")
+@app.get("/product/name/<product>")
 def get_product(product, db):
     entity = dbutilities.lookup.product_by_name(product, db)
     if entity:
