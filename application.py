@@ -18,7 +18,7 @@ app.install(sqlalchemy_plugin)
 def index():
     return template("index")
 
-@app.route('/views/modify.tpl')
+@app.route('/modify')
 def modify():
     return template('modify.tpl', root='./views/', table=db_utils.format_table())
 
