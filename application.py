@@ -3,10 +3,10 @@ import bottle
 from bottle import template, static_file, view
 from bottle_sqlalchemy import Plugin
 from sqlalchemy import create_engine
-
+import db_utils
 from model import Base
 
-engine = create_engine("sqlite:///database.db", echo=True)
+engine = create_engine("sqlite:///data.db", echo=True)
 sqlalchemy_plugin = Plugin(engine, Base.metadata, create=True)
 
 app = bottle.Bottle()
@@ -17,10 +17,14 @@ app.install(sqlalchemy_plugin)
 def index():
     return template("index")
 
+@app.route('/views/modify.tpl')
+def modify():
+    return template('modify.tpl', root='./views/', table=db_utils.format_table())
 
-@app.route("/static/<filename:path>")
+
+@app.route("/static/<filename>")
 def send_static(filename):
-    return static_file(filename, root='/static/')
+    return static_file(filename, root='/Users/connerlane/git/school/comp3700/static/css')
 
 
 if __name__ == "__main__":
