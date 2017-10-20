@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 import bottle
-from bottle import template, static_file, view
+from bottle import template, static_file, view, redirect
 from bottle_sqlalchemy import Plugin
 from sqlalchemy import create_engine
 import db_utils
@@ -22,6 +22,10 @@ def index():
 def modify():
     return template('modify.tpl', root='./views/', table=db_utils.format_table())
 
+@app.route('/delete/<index>')
+def delete(index):
+    db_utils.delete_product(index)
+    redirect('/modify')
 
 @app.route("/static/<filename>")
 def send_static(filename):

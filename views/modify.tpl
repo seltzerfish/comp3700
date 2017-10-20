@@ -9,7 +9,7 @@
     </div>
   </div>
   <dir class="row">
-   
+
   </dir>
   <div class="row", style="text-align: center; margin-top: 5%">
     <table class="u-full-width">
@@ -26,13 +26,13 @@
         </tr>
       </thead>
       <tbody style='font-weight: 300'>
-        %for row in table:
+        %for i in range(0, len(table)):
         <tr>
-          %for col in row:
+          %for col in table[i]:
           <td>{{col}}</td>
           %end
-          <td><a class="button button-primary" href="#">Update</a></td>
-          <td><a class="button button-primary" href="#" style="background-color: #e54b4b; border-color: #e54b4b; ">Delete</a></td>
+          <td><a class="button button-primary" href="update/{{i + 1}}">Update</a></td>
+          <td><a class="button button-primary" href="delete/{{table[i][1]}}" style="background-color: #e54b4b; border-color: #e54b4b; ">Delete</a></td>
         </tr>
         %end
       </tbody>
