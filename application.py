@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 import bottle
-from bottle import template, static_file, view, redirect
+from bottle import template, static_file, view, redirect, request, post
 from bottle_sqlalchemy import Plugin
 from sqlalchemy import create_engine
 import db_utils
@@ -13,6 +13,10 @@ sqlalchemy_plugin = Plugin(engine, Base.metadata, create=True)
 app = bottle.Bottle()
 app.install(sqlalchemy_plugin)
 
+@app.route('/', method='POST')
+def add_product():
+    db_utils.add_new_product(request.forms)
+    redirect('/modify')
 
 @app.route("/")
 def index():
@@ -21,6 +25,10 @@ def index():
 @app.route('/modify')
 def modify():
     return template('modify.tpl', root='./views/', table=db_utils.return_table())
+
+@app.route('/add')
+def add():
+    return template('add.tpl', root='./views/')
 
 @app.route('/delete/<index>')
 def delete(index):
