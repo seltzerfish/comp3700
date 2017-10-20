@@ -20,12 +20,16 @@ def index():
 
 @app.route('/modify')
 def modify():
-    return template('modify.tpl', root='./views/', table=db_utils.format_table())
+    return template('modify.tpl', root='./views/', table=db_utils.return_table())
 
 @app.route('/delete/<index>')
 def delete(index):
     db_utils.delete_product(index)
     redirect('/modify')
+
+@app.route('/update/<index>')
+def update_item(index):
+    pass
 
 @app.route("/static/<filename>")
 def send_static(filename):

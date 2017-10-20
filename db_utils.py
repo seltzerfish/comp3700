@@ -7,7 +7,7 @@ def format_table():
     result = c.fetchall()
     return result
 
-def delete_product(index):
+def delete_product(product_id):
     conn = sqlite3.connect('database.db')
-    conn.execute("DELETE FROM Product WHERE id = " + str(index))
+    conn.execute("DELETE FROM Product WHERE id = " + str(product_id))
     conn.commit()
