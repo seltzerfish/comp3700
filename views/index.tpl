@@ -12,7 +12,7 @@
       <a class="button button-primary" href="#">Checkout</a>
     </div>
     <div class="four columns">
-      <a class="button button-primary" href="#">Add a new product</a>
+      <a class="button button-primary" href="/add">Add a new product</a>
     </div>
     <div class="four columns">
       <a class="button button-primary" href="/modify">Update existing product</a>

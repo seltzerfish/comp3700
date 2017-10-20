@@ -1,4 +1,4 @@
-%rebase layout title="Store App"
+%rebase layout title="Store App - Modify"
 <!-- Primary Page Layout
   –––––––––––––––––––––––––––––––––––––––––––––––––– -->
 <div class="container">
@@ -6,11 +6,10 @@
     <div class="twelve column" style="margin-top: 15%">
       <h4 style="text-align: center">Update Product</h4>
       <p style="text-align: center; font-weight: 200">Find an item to modify</p>
+      <div class="twelve columns", style="text-align: center"><a class="button button-primary" href="/">Return to home</a></div>
+      
     </div>
   </div>
-  <dir class="row">
-
-  </dir>
   <div class="row", style="text-align: center; margin-top: 5%">
     <table class="u-full-width">
       <thead>
