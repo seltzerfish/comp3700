@@ -28,8 +28,8 @@
       <tbody style='font-weight: 300'>
         %for i in range(0, len(table)):
         <tr>
-          %for col in table[i]:
-          <td>{{col}}</td>
+          %for j in range(0, len(table[i])):
+            <td>{{'$' if j == 3 else ''}}{{table[i][j]}}</td>
           %end
           <td><a class="button button-primary" href="update/{{i + 1}}">Update</a></td>
           <td><a class="button button-primary" href="delete/{{table[i][1]}}" style="background-color: #e54b4b; border-color: #e54b4b; ">Delete</a></td>
