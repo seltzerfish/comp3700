@@ -1,5 +1,6 @@
 #!/usr/bin/env python
-from sqlalchemy import func, Column, Integer, String, Numeric, ForeignKey, DateTime
+from sqlalchemy import (func, Column, Integer, String, Numeric, ForeignKey,
+                        DateTime)
 from sqlalchemy.ext.declarative import declarative_base
 
 Base = declarative_base()
@@ -24,8 +25,8 @@ class Product(Base):
     id = Column(Integer(), primary_key=True)
 
     name = Column(String(length=30), nullable=False)
-    quantity = Column(Integer())
-    price = Column(Numeric(precision=9, scale=2))
+    quantity = Column(Integer(), nullable=False)
+    price = Column(Numeric(precision=9, scale=2), nullable=False)
     provider = Column(String(length=30))
     provider_contact = Column(String(length=12))
 
