@@ -1,4 +1,2 @@
 bottle==0.12.13
-bottle-sqlalchemy==0.4.3
-WTForms>=2.1
-SQLAlchemy>=1.1.14
+WTForms==2.1
