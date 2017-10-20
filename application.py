@@ -30,6 +30,11 @@ def modify():
 def add():
     return template('add.tpl', root='./views/')
 
+@app.route('/update/<index>', method='POST')
+def update_item(index):
+    db_utils.update_product(request.forms, index)
+    redirect('/modify')
+
 @app.route('/delete/<index>')
 def delete(index):
     db_utils.delete_product(index)
@@ -37,7 +42,8 @@ def delete(index):
 
 @app.route('/update/<index>')
 def update_item(index):
-    pass
+    data = db_utils.get_product(index)
+    return template('update.tpl', root='./views/', item_data=data)
 
 @app.route("/static/<filename>")
 def send_static(filename):
