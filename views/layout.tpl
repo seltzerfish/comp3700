@@ -24,7 +24,7 @@
 
   <!-- Favicon
   –––––––––––––––––––––––––––––––––––––––––––––––––– -->
-  <link rel="icon" type="views/image/png" href="/static/images/favicon.png">
+  <link rel="icon" type="image/png" href="/static/images/favicon.png">
 
 </head>
 <body>
