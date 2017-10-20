@@ -1,6 +1,5 @@
-%rebase layout title="Store App - Modify"
-<!-- Primary Page Layout
-  –––––––––––––––––––––––––––––––––––––––––––––––––– -->
+% rebase("layout.tpl" title="Store App - Modify")
+
 <div class="container">
   <div class="row">
     <div class="twelve column" style="margin-top: 15%">
@@ -38,4 +37,3 @@
     </table>
   </div>
 </div>
-
