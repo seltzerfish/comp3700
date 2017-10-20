@@ -33,15 +33,16 @@ def get_product(product_id):
 
 
 def update_product(product, index):
+    product = list(product.values())
     conn = sqlite3.connect('database.db')
     conn.execute("UPDATE Product SET name = ? WHERE id = ?",
-                 (product["name"], index))
+                 (product[0], index))
     conn.execute("UPDATE Product SET quantity = ? WHERE id = ?",
-                 (product["quantity"], index))
+                 (product[1], index))
     conn.execute("UPDATE Product SET price = ? WHERE id = ?",
-                 (product["price"], index))
+                 (product[2], index))
     conn.execute("UPDATE Product SET provider = ? WHERE id = ?",
-                 (product["provider"], index))
+                 (product[3], index))
     conn.execute("UPDATE Product SET provider_contact = ? WHERE id = ?",
-                 (product["provider_contact"], index))
+                 (product[4], index))
     conn.commit()
