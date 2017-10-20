@@ -1,17 +1,11 @@
 #!/usr/bin/env python
 import bottle
 from bottle import template, static_file, view, redirect, request, post
-from bottle_sqlalchemy import Plugin
-from sqlalchemy import create_engine
 import db_utils
-from model import Base
 import os
 
 css_path = os.getcwd() + '/static/css'
-engine = create_engine("sqlite:///data.db", echo=True)
-sqlalchemy_plugin = Plugin(engine, Base.metadata, create=True)
 app = bottle.Bottle()
-app.install(sqlalchemy_plugin)
 
 @app.route('/', method='POST')
 def add_product():
