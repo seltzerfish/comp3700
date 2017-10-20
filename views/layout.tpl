@@ -5,7 +5,7 @@
   <!-- Basic Page Needs
   –––––––––––––––––––––––––––––––––––––––––––––––––– -->
   <meta charset="utf-8">
-  <title>Store App</title>
+  <title>{{title}}</title>
   <meta name="description" content="">
   <meta name="author" content="">
 
@@ -19,37 +19,19 @@
 
   <!-- CSS
   –––––––––––––––––––––––––––––––––––––––––––––––––– -->
-  <link rel="stylesheet" href="views/css/normalize.css">
-  <link rel="stylesheet" href="views/css/skeleton.css">
+  <link rel="stylesheet" href="/static/normalize.css">
+  <link rel="stylesheet" href="/static/skeleton.css">
 
   <!-- Favicon
   –––––––––––––––––––––––––––––––––––––––––––––––––– -->
-  <link rel="icon" type="views/image/png" href="images/favicon.png">
+  <link rel="icon" type="views/image/png" href="/static/images/favicon.png">
 
 </head>
 <body>
 
   <!-- Primary Page Layout
   –––––––––––––––––––––––––––––––––––––––––––––––––– -->
-  <div class="container">
-    <div class="row">
-      <div class="twelve column" style="margin-top: 15%">
-        <h4 style="text-align: center">Store App</h4>
-        <p style="text-align: center; font-weight: 200">Welcome to the store app. Click a button to get started.</p>
-      </div>
-    </div>
-  <div class="row", style="text-align: center; margin-top: 5%">
-    <div class="four columns">
-      <a class="button button-primary" href="#">Checkout</a>
-    </div>
-    <div class="four columns">
-      <a class="button button-primary" href="#">Add a new product</a>
-    </div>
-    <div class="four columns">
-      <a class="button button-primary" href="#">Update existing product</a>
-    </div>
-  </div>
-  </div>
+  %include
 
 <!-- End Document
   –––––––––––––––––––––––––––––––––––––––––––––––––– -->
