@@ -20,7 +20,8 @@ def add_new_product(item_dict):
     conn = sqlite3.connect('database.db')
     conn.execute("INSERT INTO Product"
                  "    (name,quantity,price,provider,provider_contact) "
-                 "VALUES (?, ?, ?, ?, ?)", list(item_dict.values()))
+                 "VALUES (:name,:quantity,:price,:provider,:provider_contact)",
+                 dict(item_dict))
     conn.commit()
 
 
@@ -32,17 +33,21 @@ def get_product(product_id):
     return result[0]
 
 
-def update_product(product, index):
-    product = list(product.values())
+def update_product(product, product_id):
+    """Update a product in the database.
+
+    :param FormsDict product: Product info form passed in from POST.
+    :param int product_id: Product.id key used for database lookup.
+    """
     conn = sqlite3.connect('database.db')
     conn.execute("UPDATE Product SET name = ? WHERE id = ?",
-                 (product[0], index))
+                 (product["name"], product_id))
     conn.execute("UPDATE Product SET quantity = ? WHERE id = ?",
-                 (product[1], index))
+                 (product["quantity"], product_id))
     conn.execute("UPDATE Product SET price = ? WHERE id = ?",
-                 (product[2], index))
+                 (product["price"], product_id))
     conn.execute("UPDATE Product SET provider = ? WHERE id = ?",
-                 (product[3], index))
+                 (product["provider"], product_id))
     conn.execute("UPDATE Product SET provider_contact = ? WHERE id = ?",
-                 (product[4], index))
+                 (product["provider_contact"], product_id))
     conn.commit()
