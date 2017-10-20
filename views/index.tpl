@@ -15,7 +15,7 @@
       <a class="button button-primary" href="/add">Add a new product</a>
     </div>
     <div class="four columns">
-      <a class="button button-primary" href="/modify">Update existing product</a>
+      <a class="button button-primary" href="/products">Update existing product</a>
     </div>
   </div>
 </div>

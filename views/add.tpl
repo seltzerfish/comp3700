@@ -6,7 +6,7 @@
       <h4 style="text-align: center">Add New Product</h4>
     </div>
   </div>
-  <form action="/" method="POST">
+  <form action="/add" method="POST">
     <fieldset>
       <div class="row", style="margin-top: 5%">
         <div class="six columns">

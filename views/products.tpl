@@ -1,4 +1,4 @@
-% rebase("layout.tpl" title="Store App - Modify")
+% rebase("layout.tpl", title="Store App - Products")
 
 <div class="container">
   <div class="row">
