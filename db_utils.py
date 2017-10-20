@@ -1,6 +1,6 @@
 import sqlite3
 
-def format_table():
+def return_table():
     conn = sqlite3.connect('database.db')
     c = conn.cursor()
     c.execute("SELECT name, id, quantity, price, provider, provider_contact FROM Product ORDER BY id")
