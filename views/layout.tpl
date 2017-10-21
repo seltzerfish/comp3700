@@ -19,19 +19,19 @@
 
   <!-- CSS
   –––––––––––––––––––––––––––––––––––––––––––––––––– -->
-  <link rel="stylesheet" href="/static/normalize.css">
-  <link rel="stylesheet" href="/static/skeleton.css">
+  <link rel="stylesheet" href="/static/css/normalize.css">
+  <link rel="stylesheet" href="/static/css/skeleton.css">
 
   <!-- Favicon
   –––––––––––––––––––––––––––––––––––––––––––––––––– -->
-  <link rel="icon" type="views/image/png" href="/static/images/favicon.png">
+  <link rel="icon" type="image/png" href="/static/images/favicon.png">
 
 </head>
 <body>
 
   <!-- Primary Page Layout
   –––––––––––––––––––––––––––––––––––––––––––––––––– -->
-  %include
+  {{!base}}
 
 <!-- End Document
   –––––––––––––––––––––––––––––––––––––––––––––––––– -->
