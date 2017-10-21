@@ -45,7 +45,7 @@ def add_product():
     if request.method == 'POST':
         db_utils.add_new_product(request.forms)
         redirect(app.get_url('product_list'))
-    return template('add')
+    return template('add-product')
 
 
 @app.route('/products', name='product_list')
