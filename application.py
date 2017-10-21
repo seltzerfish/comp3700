@@ -1,13 +1,9 @@
 #!/usr/bin/env python
-import os
-
 import bottle
 from bottle import template, static_file, view, redirect, request, post
 
 import db_utils
 
-# TODO: Test on other computers before removing 'css_path'.
-css_path = os.getcwd() + '/static/css'
 app = bottle.Bottle()
 
 
@@ -19,15 +15,27 @@ def index():
 @app.route('/orders', name='order_list')
 def order_list():
     table = db_utils.order_table()
-    new_id = table[-1][0] + 1
+    new_id = table[0][0] + 1
     return template('orders', table=table, new_id=new_id)
 
 
-@app.get('add/order/<order_id:int>', name='add_order')
-@app.post('add/order/<order_id:int>')
+@app.route('/order/<order_id:int>', name='order_receipt')
+def order_receipt(order_id):
+    table = db_utils.orderline_table(order_id)
+    return template('order', table=table, order_id=order_id)
+
+
+@app.get('/add/order/<order_id:int>', name='add_order')
+@app.post('/add/order/<order_id:int>')
 def add_order(order_id):
+    if not db_utils.get_order(order_id):
+        # Create order if it does not exist.
+        db_utils.add_order()
     if request.method == 'POST':
-        pass
+        # Add item to order.
+        result = db_utils.add_orderline(request.forms, order_id)
+        return template('add-order', added=result, order_id=order_id,
+                        item=request.forms)
     return template('add-order', order_id=order_id)
 
 

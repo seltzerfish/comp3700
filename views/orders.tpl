@@ -30,8 +30,9 @@
         %for i in range(0, len(table)):
         <tr>
           %for j in range(0, len(table[i])):
-            <td>{{'$' if j == 3 else ''}}{{table[i][j]}}</td>
+            <td>{{'$' if j == 1 else ''}}{{table[i][j]}}</td>
           %end
+          <td><a class="button button-primary" href="order/{{table[i][0]}}" style="background-color: #e54b4b; border-color: #e54b4b; ">Details</a></td>
         </tr>
         %end
       </tbody>
