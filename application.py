@@ -16,8 +16,23 @@ def index():
     return template('index')
 
 
-@app.get('/add', name='add_product')
-@app.post('/add')
+@app.route('/orders', name='order_list')
+def order_list():
+    table = db_utils.order_table()
+    new_id = table[-1][0] + 1
+    return template('orders', table=table, new_id=new_id)
+
+
+@app.get('add/order/<order_id:int>', name='add_order')
+@app.post('add/order/<order_id:int>')
+def add_order(order_id):
+    if request.method == 'POST':
+        pass
+    return template('add-order', order_id=order_id)
+
+
+@app.get('/add/product', name='add_product')
+@app.post('/add/product')
 def add_product():
     if request.method == 'POST':
         db_utils.add_new_product(request.forms)

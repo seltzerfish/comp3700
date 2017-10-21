@@ -9,7 +9,7 @@
   </div>
   <div class="row" style="text-align: center; margin-top: 5%">
     <div class="four columns">
-      <a class="button button-primary" href="#">Checkout</a>
+      <a class="button button-primary" href="/orders">Checkout</a>
     </div>
     <div class="four columns">
       <a class="button button-primary" href="/add">Add a new product</a>

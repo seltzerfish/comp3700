@@ -5,20 +5,28 @@ def connect_db():
     return sqlite3.connect('db/database.db', )
 
 
-def product_table():
+def order_table():
     conn = connect_db()
     c = conn.cursor()
-    c.execute("SELECT name, id, quantity, price, provider, provider_contact "
-              "FROM Product ORDER BY id")
+    c.execute("SELECT * FROM \"Order\" ORDER BY id DESC")
     result = c.fetchall()
     c.close()
     return result
 
 
-def order_table():
+def get_order_total():
     conn = connect_db()
     c = conn.cursor()
-    c.execute("SELECT ")
+    # TODO: Get order total from database using sum function.
+    c.close()
+    return 0
+
+
+def product_table():
+    conn = connect_db()
+    c = conn.cursor()
+    c.execute("SELECT name, id, quantity, price, provider, provider_contact "
+              "FROM Product ORDER BY id")
     result = c.fetchall()
     c.close()
     return result
