@@ -109,7 +109,7 @@ def add_order(order_id):
 def add_product():
     if request.method == 'POST':
         db_utils.add_new_product(request.forms)
-        redirect(app.get_url('product_list'))
+        redirect('/products')
     return template('add-product')
 
 
@@ -124,7 +124,7 @@ def product_list():
 def update_product(product_id):
     if request.method == 'POST':
         db_utils.update_product(request.forms, product_id)
-        redirect(app.get_url('product_list'))
+        redirect('/products')
     data = db_utils.get_product(product_id)
     return template('update', item_data=data)
 
@@ -132,7 +132,7 @@ def update_product(product_id):
 @get('/delete/<product_id:int>', name='delete_product')
 def delete_product(product_id):
     db_utils.delete_product(product_id)
-    redirect(app.get_url('product_list'))
+    redirect('/products')
 
 
 @route('/denied', name='denied')
