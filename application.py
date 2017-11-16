@@ -7,19 +7,7 @@ from cork.backends import SQLiteBackend
 
 import db_utils
 
-sbe = SQLiteBackend('db/database.db')
-sbe.connection.executescript("""
-    INSERT INTO users (username, desc, role, creation_date) VALUES
-    (
-        'admin',
-        'admin test user',
-        'admin',
-        '2017-11-14 20:18:00.000000'
-    );
-    INSERT INTO roles (role, level) VALUES ('admin', 100);
-    INSERT INTO roles (role, level) VALUES ('manager', 60);
-    INSERT INTO roles (role, level) VALUES ('cashier', 50);
-""")
+sbe = SQLiteBackend('db/user_database.db')
 aaa = Cork(backend=sbe, initialize=True)
 app = bottle.app()
 session_opts = {
@@ -49,6 +37,27 @@ def login():
 @route('/logout', name='logout')
 def logout():
     aaa.logout(success_redirect='/login')
+
+
+@route('/user/<user_id:int>', name='user_page')
+def user(user_id):
+    return {}  # TODO: Create user page.
+
+
+@post('/change_password')
+def change_password():
+    aaa.current_user.update(pwd=request.forms['password'])
+
+
+@post('/change_picture')
+def change_picture():
+    pass  # TODO: Change profile picture.
+
+
+@route('/admin', name='admin')
+def admin():
+    aaa.require(role='manager', fail_redirect='/sorry')
+    return {}  # TODO: Create admin page.
 
 
 @post('/create_user')
@@ -137,4 +146,4 @@ def send_static(file):
 
 
 if __name__ == "__main__":
-    app.run(port=8080)
+    bottle.run(port=8080)
