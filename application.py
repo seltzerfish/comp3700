@@ -27,9 +27,7 @@ def login():
     if request.method == 'POST':
         username = request.forms['username']
         password = request.forms['password']
-        aaa.login(username, password,
-                  success_redirect='/',
-                  fail_redirect='/login')
+        user_utils.validate_user(username, password)
     return template('login')
 
 

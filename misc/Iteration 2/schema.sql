@@ -2,11 +2,10 @@
 
 CREATE TABLE User (
   UserID INTEGER PRIMARY KEY,
-  Name TEXT NOT NULL,
   Username TEXT NOT NULL UNIQUE,
   Password TEXT NOT NULL,
   Picture BLOB,
-  Permissions TEXT NOT NULL REFERENCES UserPermissions(type)
+  Permissions TEXT NOT NULL REFERENCES UserPermissions(Type)
 );
 
 --Enumeration--

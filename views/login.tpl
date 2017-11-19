@@ -11,7 +11,7 @@
       <div class="row", style="margin-top: 5%">
         <div class="six columns">
           <label for="username">Username</label>
-          <input class="u-full-width" id="username" type="text" placeholder="johnappleseed123" name="username">
+          <input class="u-full-width" id="username" type="text" placeholder="johnappleseed" name="username">
         </div>
       </div>
       <div class="row">
