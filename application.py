@@ -2,23 +2,23 @@
 import bottle
 from bottle import template, static_file, redirect, request, get, post, route
 from beaker.middleware import SessionMiddleware
-from cork import Cork, AuthException
-from cork.backends import SQLiteBackend
-
+# from cork import Cork, AuthException
+# from cork.backends import SQLiteBackend
+import user_utils
 import db_utils
 
-sbe = SQLiteBackend('db/user_database.db')
-aaa = Cork(backend=sbe, initialize=True)
-app = bottle.app()
+# sbe = SQLiteBackend('db/user_database.db')
+# aaa = Cork(backend=sbe, initialize=True)
 session_opts = {
-    'session.cookie_expires': True,
+    'session.cookie_expires': 300,
     'session.encrypt_key': 'TEST KEY PLEASE IGNORE',
     'session.httponly': True,
     'session.timeout': 3600 * 24,  # 1 day
-    'session.type': 'cookie',
-    'session.validate_key': True
+    'session.type': 'memory',
+    'session.validate_key': True,
+    'session.auto': True
 }
-app = SessionMiddleware(app, session_opts)
+app = SessionMiddleware(bottle.app(), session_opts)
 
 
 @get('/login', name='login')
@@ -30,13 +30,13 @@ def login():
         aaa.login(username, password,
                   success_redirect='/',
                   fail_redirect='/login')
-
-    return {}  # TODO: Make login form.
+    return template('login')
 
 
 @route('/logout', name='logout')
 def logout():
-    aaa.logout(success_redirect='/login')
+    # aaa.logout(success_redirect='/login')
+    pass
 
 
 @route('/user/<user_id:int>', name='user_page')
@@ -74,7 +74,11 @@ def create_user():
 
 @route('/', name='index')
 def index():
-    return template('index')
+    s = bottle.request.environ.get('beaker.session')
+    if 'username' not in s:
+        redirect("/login") 
+    else:
+        return template('index')
 
 
 @route('/orders', name='order_list')
@@ -110,6 +114,7 @@ def add_product():
     if request.method == 'POST':
         db_utils.add_new_product(request.forms)
         redirect('/products')
+
     return template('add-product')
 
 
@@ -146,4 +151,4 @@ def send_static(file):
 
 
 if __name__ == "__main__":
-    bottle.run(port=8080)
+    bottle.run(app=app, host='localhost', port=8080, reloader=True, debug=True)
