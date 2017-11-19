@@ -20,21 +20,31 @@ session_opts = {
 }
 app = SessionMiddleware(bottle.app(), session_opts)
 
+def get_session():
+    return bottle.request.environ.get('beaker.session')
 
 @get('/login', name='login')
 @post('/login')
 def login():
+    s = get_session()
     if request.method == 'POST':
         username = request.forms['username']
         password = request.forms['password']
-        print(user_utils.is_valid_login(username, password))
-    return template('login')
+        if user_utils.is_valid_login(username, password):
+            s["username"] = username
+            s["permissions"] = user_utils.get_user_permissions(username)
+            redirect("/")
+        else:
+            return template('invalid_login', sess=get_session())
+    return template('login', sess=get_session())
 
 
 @route('/logout', name='logout')
 def logout():
-    # aaa.logout(success_redirect='/login')
-    pass
+    s = get_session()
+    del s["username"]
+    del s["permissions"]
+    redirect("/")
 
 
 @route('/user/<user_id:int>', name='user_page')
@@ -76,20 +86,20 @@ def index():
     if 'username' not in s:
         redirect("/login") 
     else:
-        return template('index')
+        return template('index', sess=get_session())
 
 
 @route('/orders', name='order_list')
 def order_list():
     table = db_utils.order_table()
     new_id = table[0][0] + 1
-    return template('orders', table=table, new_id=new_id)
+    return template('orders', table=table, new_id=new_id, sess=get_session())
 
 
 @route('/order/<order_id:int>', name='order_receipt')
 def order_receipt(order_id):
     table = db_utils.orderline_table(order_id)
-    return template('order', table=table, order_id=order_id)
+    return template('order', table=table, order_id=order_id, sess=get_session())
 
 
 @get('/add/order/<order_id:int>', name='add_order')
@@ -102,8 +112,8 @@ def add_order(order_id):
         # Add item to order.
         result = db_utils.add_orderline(request.forms, order_id)
         return template('add-order', added=result, order_id=order_id,
-                        item=request.forms)
-    return template('add-order', order_id=order_id)
+                        item=request.forms, sess=get_session())
+    return template('add-order', order_id=order_id, sess=get_session())
 
 
 @get('/add/product', name='add_product')
@@ -113,13 +123,13 @@ def add_product():
         db_utils.add_new_product(request.forms)
         redirect('/products')
 
-    return template('add-product')
+    return template('add-product', sess=get_session())
 
 
 @route('/products', name='product_list')
 def product_list():
     table = db_utils.product_table()
-    return template('products', table=table)
+    return template('products', table=table, sess=get_session())
 
 
 @get('/update/<product_id:int>', name='update_product')
@@ -129,7 +139,7 @@ def update_product(product_id):
         db_utils.update_product(request.forms, product_id)
         redirect('/products')
     data = db_utils.get_product(product_id)
-    return template('update', item_data=data)
+    return template('update', item_data=data, sess=get_session())
 
 
 @get('/delete/<product_id:int>', name='delete_product')

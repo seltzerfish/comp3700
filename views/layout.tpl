@@ -28,10 +28,30 @@
 
 </head>
 <body>
-
+  % if "username" in sess or title == "Login":
+    % if "username" in sess:
+    <div style="text-align: right; margin: 3%; margin-bottom: -10%">
+      <h5>{{sess["username"]}} 
+      %if sess["permissions"] == "MANAGER":
+      &#9733; <!-- add a star -->
+      %end
+    </h5>
+       <h6><a style="color: red" href="/logout">Logout</a></h6>
+    </div>
+    % end
   <!-- Primary Page Layout
   –––––––––––––––––––––––––––––––––––––––––––––––––– -->
-  {{!base}}
+    {{!base}}
+
+  %else:
+  <div class="container">
+    <div class="row">
+      <div class="twelve column" style="margin-top: 15%">
+        <h4 style="text-align: center">You are not logged in</h4>
+        <a href="/login" style="text-align: center; margin-top: 10%"><h5>Click here to log in</h2></a>
+      </div>
+    </div>
+  </div>
 
 <!-- End Document
   –––––––––––––––––––––––––––––––––––––––––––––––––– -->
