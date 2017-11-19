@@ -20,8 +20,10 @@ session_opts = {
 }
 app = SessionMiddleware(bottle.app(), session_opts)
 
+
 def get_session():
     return bottle.request.environ.get('beaker.session')
+
 
 @get('/login', name='login')
 @post('/login')
@@ -84,7 +86,7 @@ def create_user():
 def index():
     s = bottle.request.environ.get('beaker.session')
     if 'username' not in s:
-        redirect("/login") 
+        redirect("/login")
     else:
         return template('index', sess=get_session())
 
