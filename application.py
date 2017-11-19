@@ -41,11 +41,29 @@ def login():
     return template('login', sess=get_session())
 
 
+@get('/update_profile/self')
+@post('/update_profile/self')
+def update_profile():
+    if request.method == 'POST':
+        s = get_session()
+        username = s["username"]
+        current_password = request.forms['current_password']
+        new_password = request.forms['new_password']
+        if (current_password and new_password and
+                user_utils.is_valid_login(username, current_password)):
+            user_utils.update_password(username, new_password)
+            return template('update_profile_success', sess=s)
+        else:
+            return template('update_profile_fail', sess=s)
+    return template('update_profile', sess=get_session())
+
+
 @route('/logout', name='logout')
 def logout():
     s = get_session()
-    del s["username"]
-    del s["permissions"]
+    if "username" in s:
+        del s["username"]
+        del s["permissions"]
     redirect("/")
 
 

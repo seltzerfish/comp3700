@@ -24,3 +24,10 @@ def get_user_permissions(username):
     p = c.fetchone()
     c.close()
     return p[0]
+
+
+def update_password(username, password):
+    conn = connect_db()
+    conn.execute("UPDATE User SET Password = \"{}\" WHERE Username = \"{}\"".format(
+        password, username))
+    conn.commit()

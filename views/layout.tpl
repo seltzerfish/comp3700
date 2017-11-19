@@ -31,11 +31,11 @@
   % if "username" in sess or title == "Login":
     % if "username" in sess:
     <div style="text-align: right; margin: 3%; margin-bottom: -10%">
-      <h5>{{sess["username"]}} 
+      <a href="/update_profile/self"><h5>{{sess["username"]}} 
       %if sess["permissions"] == "MANAGER":
       &#9733; <!-- add a star -->
       %end
-    </h5>
+    </h5></a>
        <h6><a style="color: red" href="/logout">Logout</a></h6>
     </div>
     % end
