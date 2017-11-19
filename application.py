@@ -2,9 +2,8 @@
 import bottle
 from bottle import template, static_file, redirect, request, get, post, route
 from beaker.middleware import SessionMiddleware
-# from cork import Cork, AuthException
-# from cork.backends import SQLiteBackend
-import user_utils
+
+import db_utils.items
 import db_utils
 
 # sbe = SQLiteBackend('db/user_database.db')
@@ -83,26 +82,26 @@ def index():
 
 @route('/orders', name='order_list')
 def order_list():
-    table = db_utils.order_table()
+    table = db_utils.items.order_table()
     new_id = table[0][0] + 1
     return template('orders', table=table, new_id=new_id)
 
 
 @route('/order/<order_id:int>', name='order_receipt')
 def order_receipt(order_id):
-    table = db_utils.orderline_table(order_id)
+    table = db_utils.items.orderline_table(order_id)
     return template('order', table=table, order_id=order_id)
 
 
 @get('/add/order/<order_id:int>', name='add_order')
 @post('/add/order/<order_id:int>')
 def add_order(order_id):
-    if not db_utils.get_order(order_id):
+    if not db_utils.items.get_order(order_id):
         # Create order if it does not exist.
-        db_utils.add_order()
+        db_utils.items.add_order()
     if request.method == 'POST':
         # Add item to order.
-        result = db_utils.add_orderline(request.forms, order_id)
+        result = db_utils.items.add_orderline(request.forms, order_id)
         return template('add-order', added=result, order_id=order_id,
                         item=request.forms)
     return template('add-order', order_id=order_id)
@@ -112,7 +111,7 @@ def add_order(order_id):
 @post('/add/product')
 def add_product():
     if request.method == 'POST':
-        db_utils.add_new_product(request.forms)
+        db_utils.items.add_new_product(request.forms)
         redirect('/products')
 
     return template('add-product')
@@ -120,7 +119,7 @@ def add_product():
 
 @route('/products', name='product_list')
 def product_list():
-    table = db_utils.product_table()
+    table = db_utils.items.product_table()
     return template('products', table=table)
 
 
@@ -128,15 +127,15 @@ def product_list():
 @post('/update/<product_id:int>')
 def update_product(product_id):
     if request.method == 'POST':
-        db_utils.update_product(request.forms, product_id)
+        db_utils.items.update_product(request.forms, product_id)
         redirect('/products')
-    data = db_utils.get_product(product_id)
+    data = db_utils.items.get_product(product_id)
     return template('update', item_data=data)
 
 
 @get('/delete/<product_id:int>', name='delete_product')
 def delete_product(product_id):
-    db_utils.delete_product(product_id)
+    db_utils.items.delete_product(product_id)
     redirect('/products')
 
 
