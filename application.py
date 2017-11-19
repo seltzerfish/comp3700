@@ -27,7 +27,7 @@ def login():
     if request.method == 'POST':
         username = request.forms['username']
         password = request.forms['password']
-        user_utils.validate_user(username, password)
+        print(user_utils.is_valid_login(username, password))
     return template('login')
 
 
