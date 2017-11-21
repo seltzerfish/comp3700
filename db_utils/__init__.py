@@ -6,6 +6,7 @@ from typing import Any, ClassVar, Dict, Iterable, List, Tuple, Union
 from bottle import FormsDict
 
 SQLiteType = Union[int, float, str, bytes, None]
+PairType = Tuple[str, SQLiteType]
 
 
 def connect_db(name: str) -> sqlite3.Connection:
@@ -42,7 +43,7 @@ class SQLiteDatabase:
                     seq_of_params: Iterable[Iterable]=()) -> sqlite3.Cursor:
         """Executes an SQLite query multiple times with different parameters.
 
-        Similar to :func:`~dbutils.SQLitedatabase.execute`, but performed over
+        Similar to :func:`~db_utils.SQLiteDatabase.execute`, but performed over
         every set of parameters in `seq_of_params`.
 
         :param query: an SQLite query
@@ -78,7 +79,7 @@ class Table:
 
     :cvar table_name: name of the table in the database
     :cvar primary_key: name of the primary key of the table
-    :ivar db: the :instance:`~db_utils.SQLiteDatabase` object to use as a
+    :ivar db: the :class:`~db_utils.SQLiteDatabase` object to use as a
         connection to the SQLite database
     """
 
@@ -90,7 +91,7 @@ class Table:
     def __init__(self, db: SQLiteDatabase):
         self.db = db
 
-    def get(self, value, key: str=primary_key) -> sqlite3.Row:
+    def get(self, value: SQLiteType, key: str=primary_key) -> sqlite3.Row:
         """Fetches a row from the table.
 
         :param value: the key value of the row to fetch
@@ -114,7 +115,10 @@ class Table:
         return self.db.fetchall(query, params)
 
     def add(self, row: Dict[str, Any]):
-        """Adds a row into the table."""
+        """Adds a row into the table.
+
+        :param row: the row to add to the table, in dict form
+        """
         sub_marks = ','.join(['?'] * len(row))
         query = f'INSERT INTO ? ({sub_marks}) VALUES ({sub_marks})'
         params = (self.table_name, *row.keys(), *row.values())
@@ -124,24 +128,29 @@ class Table:
         """Adds a row with default values into the table."""
         self.db.execute('INSERT INTO ? DEFAULT VALUES', (self.table_name,))
 
-    def update(self, field: Tuple[str, Any], key: Tuple[str, Any]):
+    def update(self, field: PairType, value: SQLiteType, key: str=primary_key):
         """Updates a row in the specified table in the database.
 
         :param field: `tuple` (name, value) pair for the updated field
-        :param key: `tuple` (name, value) pair for the primary key
+        :param value: the key value of the row to delete
+        :param key: (default: :attr:`~db_utils.Table.primary_key`) the field
+            to use as a key
         """
         self.db.execute('UPDATE ? SET ? = ? WHERE ? = ?',
-                        (self.table_name, *field, *key))
+                        (self.table_name, *field, key, value))
 
-    def update_from_form(self, form: FormsDict, key: Tuple[str, Any]):
+    def update_from_form(self, form: FormsDict, value: SQLiteType,
+                         key: str=primary_key):
         """Updates a row in the specified table using a POST request form.
 
         :param form: POST request form containing row data
-        :param key: `tuple` (name, value) pair for the given key
+        :param value: the key value of the row to delete
+        :param key: (default: :attr:`~db_utils.Table.primary_key`) the field
+            to use as a key
         """
         values = []
         for field, data in form.items():
-            values.append((self.table_name, field, data, *key))
+            values.append((self.table_name, field, data, key, value))
         self.db.executemany('UPDATE ? SET ? = ? WHERE ? = ?', values)
 
     def delete(self, value: SQLiteType, key: str=primary_key):

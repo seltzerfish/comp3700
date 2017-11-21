@@ -28,7 +28,7 @@ class Order(Table):
     primary_key = 'id'
 
     def update_total(self, order_id: int, total: float):
-        self.update(('total', total), (self.primary_key, order_id))
+        self.update(('total', total), order_id)
 
 
 class OrderLine(Table):
