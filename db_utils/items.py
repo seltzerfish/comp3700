@@ -1,88 +1,73 @@
 #!/usr/bin/env python
-from db_utils import SQLiteDatabase
+import sqlite3
+
+from bottle import FormsDict
+
+from db_utils import Table
 
 
-class ItemDatabase(SQLiteDatabase):
-    def __init__(self):
-        super().__init__('item_database.db')
+class Product(Table):
+    """A Product table of an item database."""
 
-    def get_product(self, product_id):
-        return self.get_row('Product', ('id', product_id))
+    table_name = 'Product'
+    primary_key = 'id'
 
-    def get_product_by_name(self, name):
-        return self.get_row('Product', ('name', name))
+    def get_by_name(self, name) -> sqlite3.Row:
+        """Fetch a Product row by its 'name' field.
 
-    def product_table(self):
-        query = ('SELECT name, id, quantity, price, provider, '
-                 '    provider_contact '
-                 'FROM Product ORDER BY id')
-        return self.fetchall(query)
-
-    def add_new_product(self, item):
-        query = ('INSERT INTO Product '
-                 '    (name, quantity, price, provider, provider_contact) '
-                 'VALUES '
-                 '    (:name, :quantity, :price, :provider, :provider_contact)')
-        self.execute(query, dict(item))
-
-    def update_product(self, product, product_id):
-        """Update a product in the item database.
-
-        :param FormsDict product: Product info form passed in from POST.
-        :param int product_id: Primary key used for database lookup.
+        :param: the name of the product to find
+        :return: a row of the found product
         """
-        self.update_row_from_form(product, 'Product', ('id', product_id))
+        return self.get(name, key='name')
 
-    def delete_product(self, product_id):
-        self.delete_row('Product', ('id', product_id))
 
-    def get_order(self, order_id):
-        return self.get_row('"Order"', ('id', order_id))
+class Order(Table):
+    """An Order table of an item database."""
 
-    def order_table(self):
-        return self.get_table('"Order"')
+    table_name = '"Order"'
+    primary_key = 'id'
 
-    def add_new_order(self):
-        self.add_default_row('"Order"')
+    def update_total(self, order_id: int, total: float):
+        self.update(('total', total), (self.primary_key, order_id))
 
-    def update_order(self, field, order_id):
-        self.update_row('"Order"', field, ('id', order_id))
 
-    def delete_order(self, order_id):
-        self.delete_row('"Order"', ('id', order_id))
+class OrderLine(Table):
+    """An OrderLine table of an item database."""
 
-    def orderline_table(self, order_id):
+    table_name = 'OrderLine'
+    primary_key = 'id'
+
+    def _create_orderline_row(self, form: FormsDict):
+        """Helper method to create OrderLine row."""
+        product = Product(self.db)
+        product_row = product.get_by_name(form['name'])
+
+        if product_row is None:
+            raise sqlite3.DatabaseError("Product not found.")
+
+        cost = int(form['quantity']) * product_row['price']
+        return {'product_id': product_row['id'],
+                'price': product_row['price'],
+                'quantity': int(form['quantity']),
+                'cost': cost}
+
+    def _update_order_total(self, cost: float, order_id: int):
+        """Helper method to update the 'total' field of an Order table."""
+        order = Order(self.db)
+        order_row = order.get(order_id)
+        total = order_row['total'] + cost
+        order.update_total(order_id, total)
+
+    def add_by_form(self, form: FormsDict, order_id: int):
+        """Add a row using data from a POST request form."""
+        orderline_row = self._create_orderline_row(form)
+        self._update_order_total(orderline_row['cost'], order_id)
+        self.add(orderline_row)
+
+    def receipt(self, order_id: int):
         query = ('SELECT Product.name, OrderLine.quantity, OrderLine.price,'
                  '    OrderLine.cost '
                  'FROM OrderLine '
                  'JOIN Product ON Product.id = OrderLine.product_id '
                  'WHERE order_id = ? ORDER BY OrderLine.id')
-        return self.fetchall(query, (order_id,))
-
-    def add_orderline(self, order_id, product_id, quantity, price, cost):
-        self.execute('INSERT INTO OrderLine'
-                     '    (order_id, product_id, quantity, price, cost) '
-                     'VALUES (?, ?, ?, ?, ?)',
-                     (order_id, product_id, quantity, price, cost))
-
-    def add_orderline_from_item(self, item, order_id):
-        product_result = self.get_product_by_name(item['name'])
-        order_result = self.get_order(order_id)
-
-        if product_result is None:
-            # Item not found.
-            return False
-
-        product_id = product_result['id']
-        price = product_result['price']
-        quantity = int(item['quantity'])
-        cost = quantity * price
-
-        # Update order total.
-        total = order_result['total'] + cost
-        self.update_row('"Order"', ('total', total), ('id', order_id))
-
-        # Add order line.
-        self.add_orderline(cost, order_id, price, product_id, quantity)
-
-        return True
+        return self.db.fetchall(query, (order_id,))

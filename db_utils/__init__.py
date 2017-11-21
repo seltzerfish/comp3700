@@ -1,7 +1,11 @@
 #!/usr/bin/env python
-from bottle import FormsDict
+import abc
 import sqlite3
-from typing import Any, ClassVar, Iterable, List, Tuple
+from typing import Any, ClassVar, Dict, Iterable, List, Tuple, Union
+
+from bottle import FormsDict
+
+SQLiteType = Union[int, float, str, bytes, None]
 
 
 def connect_db(name: str) -> sqlite3.Connection:
@@ -10,8 +14,8 @@ def connect_db(name: str) -> sqlite3.Connection:
     :param name: filename of an SQLite database
     :return: an SQLite database connection
 
-    .. note:: Attaches an sqlite3.Row row factory to the connection to allow
-        indexing of fetched rows.
+    .. note:: Attaches an :class:`sqlite3.Row` row factory to the connection to
+        allow indexing of fetched rows.
     """
     conn = sqlite3.connect(f'db/{name}')
     conn.row_factory = sqlite3.Row
@@ -20,6 +24,7 @@ def connect_db(name: str) -> sqlite3.Connection:
 
 class SQLiteDatabase:
     """An SQLite database controller."""
+
     def __init__(self, name):
         self.connection = connect_db(name)
 
@@ -67,65 +72,57 @@ class SQLiteDatabase:
         c = self.execute(query, params)
         return c.fetchall()
 
-    def get_table(self, table: str, desc: bool=False) -> List[sqlite3.Row]:
-        """Fetches all rows from a specified table in the database.
-
-        :param table: case-sensitive name of the table
-        :param desc: if `True`, table will be ordered by descending ROWID
-        :return: all rows from specified table in database
-        """
-        query, params = 'SELECT * FROM ?', (table,)
-        if desc:
-            query = 'SELECT * FROM ? ORDER BY ?.ROWID DESC'
-            params = (table, table)
-        return self.fetchall(query, params)
-
-    def get_row(self, table: str, key: Tuple[str, Any]) -> sqlite3.Row:
-        """Fetches a row from a specified table in the database.
-
-        :param table: case-sensitive name of the table
-        :param key: `tuple` (name, value) pair for the primary key
-        :return: a row matching the provided key pair
-        """
-        return self.fetchone('SELECT * FROM ? WHERE ? = ?',
-                             (table, *key))
-
-    def add_default_row(self, table: str):
-        """Adds a row with default values into the specified table.
-
-        :param table: case-sensitive name of the table
-        """
-        self.execute('INSERT INTO ? DEFAULT VALUES',
-                     (table,))
-
-    def update_row_from_form(self, form: FormsDict, table: str,
-                             key: Tuple[str, Any]):
-        """Updates a row in the specified table using a POST request form.
-
-        :param form: POST request form containing table data
-        :param table: case-sensitive table name
-        :param key: `tuple` (name, value) pair for the primary key
-        """
-        values = []
-        for field, data in form.items():
-            values.append((table, field, data, *key))
-        self.executemany('UPDATE ? SET ? = ? WHERE ? = ?', values)
-
-
 
 class Table:
-    """A base class for database tables."""
+    """An abstract base class for SQLite database tables.
+
+    :cvar table_name: name of the table in the database
+    :cvar primary_key: name of the primary key of the table
+    :ivar db: the :instance:`~db_utils.SQLiteDatabase` object to use as a
+        connection to the SQLite database
+    """
+
+    __metaclass__ = abc.ABCMeta
+
     table_name: ClassVar[str] = str()
     primary_key: ClassVar[str] = str()
 
     def __init__(self, db: SQLiteDatabase):
         self.db = db
 
-    def get(self, rowid: Any) -> sqlite3.Row:
-        return self.db.get_row(self.table_name, (self.primary_key, rowid))
+    def get(self, value, key: str=primary_key) -> sqlite3.Row:
+        """Fetches a row from the table.
 
-    def get_by(self, key: Tuple[str, Any]):
-        return self.db.get_row(self.table_name, key)
+        :param value: the key value of the row to fetch
+        :param key: (default: :attr:`~db_utils.Table.primary_key`) the field
+            to use as a key
+        :return: a row matching the provided key
+        """
+        return self.db.fetchone('SELECT * FROM ? WHERE ? = ?',
+                                (self.table_name, key, value))
+
+    def get_all(self, descending: bool=False):
+        """Fetches all rows from a specified table in the database.
+
+        :param descending: if `True`, rows will be ordered by descending ROWID
+        :return: all rows from specified table in database
+        """
+        query, params = 'SELECT * FROM ?', (self.table_name,)
+        if descending:
+            query = 'SELECT * FROM ? ORDER BY ROWID DESC'
+            params = (self.table_name,)
+        return self.db.fetchall(query, params)
+
+    def add(self, row: Dict[str, Any]):
+        """Adds a row into the table."""
+        sub_marks = ','.join(['?'] * len(row))
+        query = f'INSERT INTO ? ({sub_marks}) VALUES ({sub_marks})'
+        params = (self.table_name, *row.keys(), *row.values())
+        self.db.execute(query, params)
+
+    def add_default(self):
+        """Adds a row with default values into the table."""
+        self.db.execute('INSERT INTO ? DEFAULT VALUES', (self.table_name,))
 
     def update(self, field: Tuple[str, Any], key: Tuple[str, Any]):
         """Updates a row in the specified table in the database.
@@ -136,10 +133,23 @@ class Table:
         self.db.execute('UPDATE ? SET ? = ? WHERE ? = ?',
                         (self.table_name, *field, *key))
 
-    def delete(self, rowid: Any):
+    def update_from_form(self, form: FormsDict, key: Tuple[str, Any]):
+        """Updates a row in the specified table using a POST request form.
+
+        :param form: POST request form containing row data
+        :param key: `tuple` (name, value) pair for the given key
+        """
+        values = []
+        for field, data in form.items():
+            values.append((self.table_name, field, data, *key))
+        self.db.executemany('UPDATE ? SET ? = ? WHERE ? = ?', values)
+
+    def delete(self, value: SQLiteType, key: str=primary_key):
         """Deletes a row from the table.
 
-        :param rowid: `tuple` (name, value) pair for the primary key
+        :param value: the key value of the row to delete
+        :param key: (default: :attr:`~db_utils.Table.primary_key`) the field
+            to use as a key
         """
         self.db.execute('DELETE FROM ? WHERE ? = ?',
-                        (self.table_name, *rowid))
+                        (self.table_name, key, value))
