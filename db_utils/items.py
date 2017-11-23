@@ -3,7 +3,7 @@ import sqlite3
 
 from bottle import FormsDict
 
-from db_utils import Table
+from db_utils import Table, SQLiteDatabase
 
 
 class Product(Table):
@@ -46,15 +46,19 @@ class OrderLine(Table):
     table_name = 'OrderLine'
     primary_key = 'id'
 
+
+class ItemDatabase(SQLiteDatabase):
+    """Controller for SQLite item databases."""
+
     def _create_orderline_row(self, form):
-        """Helper method to create OrderLine row.
+        """Helper method to create OrderLine row from item form.
 
         :param form: POST request form to pull data from
         :type form: FormsDict
         :return: new OrderLine row in regular dict form
         :rtype: dict
         """
-        product = Product(self.db)
+        product = Product(self)
         product_row = product.get_by_name(form['name'])
 
         if product_row is None:
@@ -66,7 +70,7 @@ class OrderLine(Table):
                 'quantity': int(form['quantity']),
                 'cost': cost}
 
-    def _update_order_total(self, cost: float, order_id: int):
+    def _update_order_total(self, cost, order_id):
         """Helper method to update the 'total' field of an Order table.
 
         :param order_id: primary key of Order row
@@ -74,7 +78,7 @@ class OrderLine(Table):
         :type order_id: int
         :type cost: float
         """
-        order = Order(self.db)
+        order = Order(self)
         order_row = order.get(order_id)
         total = order_row['total'] + cost
         order.update_total(order_id, total)
@@ -89,7 +93,8 @@ class OrderLine(Table):
         """
         orderline_row = self._create_orderline_row(form)
         self._update_order_total(orderline_row['cost'], order_id)
-        self.add(orderline_row)
+        orderline = OrderLine(self)
+        orderline.add(orderline_row)
 
     def receipt(self, order_id):
         """Fetches a receipt of a given order.
@@ -107,4 +112,4 @@ class OrderLine(Table):
                  'FROM OrderLine '
                  'JOIN Product ON Product.id = OrderLine.product_id '
                  'WHERE order_id = ? ORDER BY OrderLine.id')
-        return self.db.fetchall(query, (order_id,))
+        return self.fetchall(query, (order_id,))
