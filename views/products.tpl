@@ -1,5 +1,5 @@
 % rebase("layout.tpl", title="Store App - Products")
-
+% if "permissions" in sess and sess["permissions"] == "MANAGER":
 <div class="container">
   <div class="row">
     <div class="twelve column" style="margin-top: 15%">
@@ -37,3 +37,5 @@
     </table>
   </div>
 </div>
+% else:
+ % include('wrong_permissions.tpl')

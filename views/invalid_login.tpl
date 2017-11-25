@@ -4,8 +4,10 @@
   <div class="row">
     <div class="twelve columns" style="margin-top: 10%">
       <h4 style="text-align: center">Login</h4>
+      <div style="text-align: center; color: red">Invalid Login</div>
     </div>
   </div>
+  
   <form action="/login" method="POST" style="margin-left: 35%">
     <fieldset>
       <div class="row", style="margin-top: 5%">

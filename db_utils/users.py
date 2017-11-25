@@ -4,14 +4,33 @@ from sqlite3 import DatabaseError
 from db_utils import Table, SQLiteDatabase
 
 
-class User:
+class User(Table):
     """User table of user database."""
     table_name = 'User'
     primary_key = 'Username'
 
+    def update_password(self, username, password):
+        """Updates the 'Password' field of a given user.
+
+        :param username: primary key of user to change password
+        :param password: new password to change to
+        :type username: str
+        :type password: str
+        """
+        self.update(('Password', password), username)
+
 
 class UserDatabase(SQLiteDatabase):
     """Controller for SQL user database."""
+
+    def add_user(self, username, password, permissions):
+        user_info = {'Username': username, 'Password': password,
+                     'Permissions': permissions}
+        User(self).add(user_info)
+
+    def check_permissions(self, username):
+        user = User(self).get(username)
+        return user['Permissions']
 
     def authorize(self, username):
         """Check the authorization of a given user.
@@ -38,3 +57,6 @@ class UserDatabase(SQLiteDatabase):
         """
         user = User(self).get(username)
         return user and user['Password'] == password
+
+    def update_password(self, username, password):
+        User(self).update_password(username, password)

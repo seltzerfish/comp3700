@@ -1,11 +1,9 @@
 #!/usr/bin/env python
 import abc
 import sqlite3
-from typing import Any, ClassVar, Dict, Iterable, List, Tuple, Union
+from typing import Iterable
 
 from bottle import FormsDict
-
-SQLiteType = Union[int, float, str, bytes]
 
 
 def connect_db(name):
@@ -79,25 +77,23 @@ class SQLiteDatabase:
         :type query: str
         :type params: Iterable
         :return: all rows fetched from an SQLite query
-        :rtype: List[sqlite3.Row]
+        :rtype: list[sqlite3.Row]
         """
         c = self.execute(query, params)
         return c.fetchall()
 
 
-class Table:
+class Table(metaclass=abc.ABCMeta):
     """An abstract base class for SQLite database tables.
 
     :cvar table_name: name of the table in the database
     :cvar primary_key: name of the primary key of the table
     :ivar db: the :class:`~db_utils.SQLiteDatabase` object to use as a
         connection to the SQLite database
-    :type table_name: ClassVar[str]
-    :type primary_key: ClassVar[str]
+    :type table_name: str
+    :type primary_key: str
     :type db: SQLiteDatabase
     """
-
-    __metaclass__ = abc.ABCMeta
 
     table_name = str()
     primary_key = str()
@@ -111,7 +107,7 @@ class Table:
         :param value: the key value of the row to fetch
         :param key: (default: :attr:`~db_utils.Table.primary_key`) the field
             to use as a key
-        :type value: SQLiteType
+        :type value: int | float | str | bytes
         :type key: str
         :return: a row matching the provided key
         :rtype: sqlite3.Row
@@ -125,7 +121,7 @@ class Table:
         :param descending: if `True`, rows will be ordered by descending ROWID
         :type descending: bool
         :return: all rows from specified table in database
-        :rtype: List[sqlite3.Row]
+        :rtype: list[sqlite3.Row]
         """
         query, params = 'SELECT * FROM ?', (self.table_name,)
         if descending:
@@ -137,7 +133,7 @@ class Table:
         """Adds a row into the table.
 
         :param row: the row to add to the table, in dict form
-        :type row: Dict[str, SQLiteType]
+        :type row: dict[str, int | float | str | bytes]
         """
         sub_marks = ','.join(['?'] * len(row))
         query = 'INSERT INTO ? ({sub_marks}) VALUES ({sub_marks})'
@@ -156,8 +152,8 @@ class Table:
         :param value: the key value of the row to delete
         :param key: (default: :attr:`~db_utils.Table.primary_key`) the field
             to use as a key
-        :type field: Tuple[str, SQLiteType]
-        :type value: SQLiteType
+        :type field: tuple[str, int | float | str | bytes]
+        :type value: int | float | str | bytes
         :type key: str
         """
         self.db.execute('UPDATE ? SET ? = ? WHERE ? = ?',
@@ -170,7 +166,8 @@ class Table:
         :param value: the key value of the row to delete
         :param key: (default: :attr:`~db_utils.Table.primary_key`) the field
             to use as a key
-        :type value: SQLiteType
+        :type form: FormsDict
+        :type value: int | float | str | bytes
         :type key: str
         """
         values = []
@@ -184,8 +181,11 @@ class Table:
         :param value: the key value of the row to delete
         :param key: (default: :attr:`~db_utils.Table.primary_key`) the field
             to use as a key
-        :type value: SQLiteType
+        :type value: int | float | str | bytes
         :type key: str
         """
         self.db.execute('DELETE FROM ? WHERE ? = ?',
                         (self.table_name, key, value))
+
+    def thing(self):
+        pass
