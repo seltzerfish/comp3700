@@ -198,7 +198,7 @@ def product_list():
 @get('/update/<product_id:int>', name='update_product')
 @post('/update/<product_id:int>')
 def update_product(product_id):
-    product_table = user_db.table(Product)
+    product_table = item_db.table(Product)
     if request.method == 'POST':
         product_table.update_from_form(request.forms, product_id)
         redirect(get_url('products'))
