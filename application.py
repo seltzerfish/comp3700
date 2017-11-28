@@ -3,6 +3,7 @@ import bottle
 from bottle import template, static_file, redirect, request, get, post, route
 from beaker.middleware import SessionMiddleware
 from sqlite3 import DatabaseError
+from random import choice
 
 from db_utils.items import ItemDatabase, Product, Order
 from db_utils.users import UserDatabase, User
@@ -95,16 +96,22 @@ def admin():
     return {}  # TODO: Create admin page.
 
 
+
+@get('/create_user')
 @post('/create_user')
 def create_user():
-    username = request.forms['username']
-    role = request.forms['role']
-    password = request.forms['password']
-    try:
-        user_db.add_user(username, password, role)
-        return {'ok': True}
-    except DatabaseError as e:
-        return {'ok': False, 'msg': e}
+    if request.method == 'POST':
+        username = request.forms['username']
+        role = request.forms['role']
+        ranges = list(range(48, 58)) + list(range(65, 91)) + list(range(97, 123))
+        temp_password = "".join([chr(choice(ranges)) for i in range(12)])
+        try:
+            user_db.add_user(username, temp_password, role)
+            return template('create_user_success', sess=get_session(), user=username, pw=temp_password)
+        except DatabaseError as e:
+            return {'ok': False, 'msg': e}
+    else:
+        return template('create_user', sess=get_session())
 
 
 @route('/', name='index')

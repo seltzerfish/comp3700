@@ -28,7 +28,8 @@
           <input class="u-full-width" id="new_password" type="password"  name="new_password">
         </div>
       </div>
-      <input class="button-primary" style="margin: 3%; margin-left: 0%" type="submit" value="Update">
+      <a class="button" href="/">Cancel</a>
+      <input class="button-primary" style="margin: 3%" type="submit" value="Update">
     </fieldset>
   </form>
 </div>
