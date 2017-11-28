@@ -105,7 +105,6 @@ def create_user():
         role = request.forms['role']
         ranges = list(range(48, 58)) + list(range(65, 91)) + list(range(97, 123))
         temp_password = "".join([chr(choice(ranges)) for i in range(12)])
-        print(temp_password)
         try:
             user_db.add_user(username, temp_password, role)
             return template('create_user_success', sess=get_session(), user=username, pw=temp_password)
