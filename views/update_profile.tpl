@@ -2,10 +2,11 @@
 
 <div class="container">
   <div class="row">
-    <div class="twelve columns" style="margin-top: 4%; margin-bottom: 5%">
-      <h3 style="text-align: center">Update Profile</h3>
+    <div class="twelve columns" style="margin-top: 4%;  ">
+      <h2 style="text-align: center">Update Profile</h2>
     </div>
   </div>
+  <hr>
 
   <div class = "row">
     <div class="four columns">
@@ -33,7 +34,7 @@
       <input class="button-primary" style="margin: 3%" type="submit" value="Update Password">
     </fieldset>
   </form>
-
+  <hr>
   <div class = "row">
     <div class="four columns">
       <h5 style="text-align: center"></h5>
@@ -43,24 +44,28 @@
     </div>
   </div>
 
-  % if sess['has_picture']:
-  <div class="row" style="margin-top: 5%">
-    <img src="/profile/{{ sess['username'] }}/image" alt="Profile Picture" style="max-width: 100%; max-height: 100%; width: 15vw; height: 15vw">
+  
+  <div class="four columns">
+    <div class="row" style="margin-top: 5%">
+      % if 'has_picture' in sess and sess['has_picture']:
+      <img src="/profile/{{ sess['username'] }}/image" alt="Profile Picture" style="max-width: 100%; max-height: 100%; width: 15vw; height: 15vw">
+      %else:
+      <img src="/static/images/generic-profile.jpg" alt="Profile Picture" style="max-width: 100%; max-height: 100%; width: 15vw; height: 15vw">
+      % end
+    </div>
   </div>
-  % end
-
-  <form action="/change_picture" method="POST" enctype="multipart/form-data" style="margin-left: 35%">
-    <fieldset>
-      <div class="row" style="margin-top: 5%">
-        <div class="twelve columns">
-          <label for="picture">New Picture</label>
-          <input class="u-full-width" id="picture" type="file" accept="image/*" name="picture">
-        </div>
+  <div class="six columns" style="margin-top: 3%">
+    <form action="/change_picture" method="POST" enctype="multipart/form-data">
+      <fieldset>
+        <label for="picture">New Picture</label>
+        <input class="u-full-width" id="picture" type="file" accept="image/*" name="picture">
+      </fieldset>
+      <div class="row">
+        <input class="button-primary" style="margin: 3% 3% 3% 0;" type="submit" value="Update Picture">
       </div>
-      <input class="button-primary" style="margin: 3% 3% 3% 0;" type="submit" value="Update Picture">
-    </fieldset>
-  </form>
 
+    </form>
+  </div>
   % if defined('success'):
   <div class="row" style="margin-left: 35%">
     % if success:
