@@ -30,7 +30,7 @@
 <body>
   % if "username" in sess or title == "Login":
     % if "username" in sess:
-    <div style="text-align: right; margin: 3%; margin-bottom: -10%">
+    <div style="text-align: right; margin: 3% 3% -10%;">
       <a href="/update_profile/self"><h5>{{sess["username"]}} 
       %if sess["permissions"] == "MANAGER":
       &#9733; <!-- add a star -->
@@ -48,7 +48,7 @@
     <div class="row">
       <div class="twelve column" style="margin-top: 15%">
         <h4 style="text-align: center">You are not logged in</h4>
-        <a href="/login" style="text-align: center; margin-top: 10%"><h5>Click here to log in</h2></a>
+        <a href="/login" style="text-align: center; margin-top: 10%"><h5>Click here to log in</h5></a>
       </div>
     </div>
   </div>

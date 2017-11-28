@@ -6,6 +6,7 @@
       <h3 style="text-align: center">Update Profile</h3>
     </div>
   </div>
+
   <div class = "row">
     <div class="four columns">
       <h5 style="text-align: center"></h5>
@@ -14,9 +15,9 @@
       <h5 style="text-align: center">Change Password</h5>
     </div>
   </div>
-  <form action="/update_profile/self" method="POST" style="margin-left: 35%">
+  <form action="/change_password" method="POST" style="margin-left: 35%">
     <fieldset>
-      <div class="row", style="margin-top: 5%">
+      <div class="row" style="margin-top: 5%">
         <div class="six columns">
           <label for="current_password">Current Password</label>
           <input class="u-full-width" id="current_password" type="password"  name="current_password">
@@ -28,7 +29,44 @@
           <input class="u-full-width" id="new_password" type="password"  name="new_password">
         </div>
       </div>
-      <input class="button-primary" style="margin: 3%; margin-left: 0%" type="submit" value="Update">
+      <input class="button-primary" style="margin: 3% 3% 3% 0;" type="submit" value="Update Password">
     </fieldset>
   </form>
+
+  <div class = "row">
+    <div class="four columns">
+      <h5 style="text-align: center"></h5>
+    </div>
+    <div class="four columns">
+      <h5 style="text-align: center">Change Profile Picture</h5>
+    </div>
+  </div>
+
+  % if sess['has_picture']:
+  <div class="row" style="margin-top: 5%">
+    <img src="/profile/{{ sess['username'] }}/image" alt="Profile Picture" style="max-width: 100%; max-height: 100%; width: 15vw; height: 15vw">
+  </div>
+  % end
+
+  <form action="/change_picture" method="POST" enctype="multipart/form-data" style="margin-left: 35%">
+    <fieldset>
+      <div class="row" style="margin-top: 5%">
+        <div class="twelve columns">
+          <label for="picture">New Picture</label>
+          <input class="u-full-width" id="picture" type="file" accept="image/*" name="picture">
+        </div>
+      </div>
+      <input class="button-primary" style="margin: 3% 3% 3% 0;" type="submit" value="Update Picture">
+    </fieldset>
+  </form>
+
+  % if defined('success'):
+  <div class="row" style="margin-left: 35%">
+    % if success:
+    <h5 style="color: green">Success! Profile updated.</h5>
+    % else:
+    <h5 style="color: red">Something Went Wrong. Try again.</h5>
+    % end
+  </div>
+  % end
 </div>

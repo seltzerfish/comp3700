@@ -82,6 +82,16 @@ class SQLiteDatabase:
         c = self.execute(query, params)
         return c.fetchall()
 
+    def table(self, cls):
+        """Returns a Table object under the current database.
+
+        :param cls: Table class to instantiate
+        :type cls: type
+        :return: an instantiated Table
+        :rtype: Table
+        """
+        return cls(self)
+
 
 class Table(metaclass=abc.ABCMeta):
     """An abstract base class for SQLite database tables.
