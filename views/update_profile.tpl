@@ -6,6 +6,15 @@
       <h2 style="text-align: center">Update Profile</h2>
     </div>
   </div>
+  % if defined('success'):
+  <div class="row" style="margin-left: 35%">
+    % if success:
+    <h5 style="color: green">Success! Profile updated.</h5>
+    % else:
+    <h5 style="color: red">Something Went Wrong. Try again.</h5>
+    % end
+  </div>
+  % end
   <hr>
 
   <div class = "row">
@@ -65,14 +74,7 @@
       </div>
 
     </form>
+
+
   </div>
-  % if defined('success'):
-  <div class="row" style="margin-left: 35%">
-    % if success:
-    <h5 style="color: green">Success! Profile updated.</h5>
-    % else:
-    <h5 style="color: red">Something Went Wrong. Try again.</h5>
-    % end
-  </div>
-  % end
 </div>
