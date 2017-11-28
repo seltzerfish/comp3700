@@ -1,4 +1,4 @@
-#Use Case 1: Log in
+# Use Case 1: Log in
 
 Assume we are logging into the 'admin' account, which is classified as a manager.
 

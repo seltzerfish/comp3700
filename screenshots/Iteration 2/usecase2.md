@@ -1,4 +1,4 @@
-#Use Case 1: Change log in password
+# Use Case 1: Change log in password
 
 Assume we are already logged in to our 'admin' account.
 
