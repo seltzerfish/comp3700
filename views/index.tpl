@@ -8,6 +8,7 @@
     </div>
   </div>
   <div class="row" style="text-align: center; margin-top: 5%">
+    % if "permissions" in sess and sess["permissions"] == "MANAGER":
     <div class="four columns">
       <a class="button button-primary" href="/orders">Checkout</a>
     </div>
@@ -17,5 +18,10 @@
     <div class="four columns">
       <a class="button button-primary" href="/products">Update existing product</a>
     </div>
+    % else:
+      <div class="twelve columns">
+      <a class="button button-primary" href="/orders">Checkout</a>
+    </div>
+    %end
   </div>
 </div>

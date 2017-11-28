@@ -1,8 +1,7 @@
 --Note: This schema is written in SQLite.
 
 CREATE TABLE User (
-  UserID INTEGER PRIMARY KEY,
-  Username TEXT NOT NULL UNIQUE,
+  Username TEXT PRIMARY KEY,
   Password TEXT NOT NULL,
   Picture BLOB,
   Permissions TEXT NOT NULL REFERENCES UserPermissions(Type)
@@ -53,7 +52,7 @@ CREATE TABLE Product (
 
 CREATE TABLE "Order" (
   OrderID INTEGER PRIMARY KEY,
-  EmployeeID INTEGER NOT NULL REFERENCES User(UserID),
+  EmployeeID INTEGER NOT NULL REFERENCES User(Username),
   CustomerID INTEGER NOT NULL REFERENCES Customer(CustomerID),
   Total DECIMAL(9,2) DEFAULT 0.00,
   Date DATE DEFAULT (date('now'))
