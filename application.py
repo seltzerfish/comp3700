@@ -179,9 +179,18 @@ def denied():
     return {}  # TODO: Make "sorry, you're unauthorized" page.
 
 
-@route("/static/<file:path>")
+@route('/static/<file:path>')
 def send_static(file):
     return static_file(file, root='static/')
+
+
+@route('/profile/<user_id:int>/image')
+def send_profile_image(user_id):
+    import io
+    user_row = User(user_db).get(user_id)
+    picture = user_row['Picture']  # type: bytes
+    bottle.response.set_header('Content-Type', 'image/jpeg')
+    return io.BytesIO(picture)
 
 
 if __name__ == "__main__":
