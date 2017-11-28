@@ -149,7 +149,6 @@ def add_product():
     if request.method == 'POST':
         Product(item_db).add(request.forms)
         redirect('/products')
-
     return template('add-product', sess=get_session())
 
 

@@ -50,11 +50,13 @@ class OrderLine(Table):
 class ItemDatabase(SQLiteDatabase):
     """Controller for SQLite item databases."""
 
-    def _create_orderline_row(self, form):
+    def _create_orderline_row(self, form, order_id):
         """Helper method to create OrderLine row from item form.
 
         :param form: POST request form to pull data from
+        :param order_id: primary key of Order row
         :type form: FormsDict
+        :type order_id: int
         :return: new OrderLine row in regular dict form
         :rtype: dict
         """
@@ -65,7 +67,8 @@ class ItemDatabase(SQLiteDatabase):
             raise sqlite3.DatabaseError("Product not found.")
 
         cost = int(form['quantity']) * product_row['price']
-        return {'product_id': product_row['id'],
+        return {'order_id': order_id,
+                'product_id': product_row['id'],
                 'price': product_row['price'],
                 'quantity': int(form['quantity']),
                 'cost': cost}
@@ -90,11 +93,17 @@ class ItemDatabase(SQLiteDatabase):
         :param form: POST request form to pull data from
         :type order_id: int
         :type form: FormsDict
+        :return: whether the item was added successfully
+        :rtype: bool
         """
-        orderline_row = self._create_orderline_row(form)
+        try:
+            orderline_row = self._create_orderline_row(form, order_id)
+        except sqlite3.DatabaseError:
+            return False
         self._update_order_total(orderline_row['cost'], order_id)
         orderline = OrderLine(self)
         orderline.add(orderline_row)
+        return True
 
     def receipt(self, order_id):
         """Fetches a receipt of a given order.

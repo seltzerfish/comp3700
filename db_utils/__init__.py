@@ -101,7 +101,7 @@ class Table(metaclass=abc.ABCMeta):
     def __init__(self, db):
         self.db = db
 
-    def get(self, value, key=primary_key):
+    def get(self, value, key=None):
         """Fetches a row from the table.
 
         :param value: the key value of the row to fetch
@@ -112,8 +112,12 @@ class Table(metaclass=abc.ABCMeta):
         :return: a row matching the provided key
         :rtype: sqlite3.Row
         """
-        return self.db.fetchone('SELECT * FROM ? WHERE ? = ?',
-                                (self.table_name, key, value))
+        if not key:
+            key = self.primary_key
+        query = 'SELECT * FROM {table} WHERE {key} = ?'.format(
+            table=self.table_name, key=key
+        )
+        return self.db.fetchone(query, (value,))
 
     def get_all(self, descending=False):
         """Fetches all rows from a specified table in the database.
@@ -123,11 +127,12 @@ class Table(metaclass=abc.ABCMeta):
         :return: all rows from specified table in database
         :rtype: list[sqlite3.Row]
         """
-        query, params = 'SELECT * FROM ?', (self.table_name,)
+        query = 'SELECT * FROM {table}'.format(table=self.table_name)
         if descending:
-            query = 'SELECT * FROM ? ORDER BY ROWID DESC'
-            params = (self.table_name,)
-        return self.db.fetchall(query, params)
+            query = 'SELECT * FROM {table} ORDER BY ROWID DESC'.format(
+                table=self.table_name
+            )
+        return self.db.fetchall(query)
 
     def add(self, row):
         """Adds a row into the table.
@@ -135,17 +140,21 @@ class Table(metaclass=abc.ABCMeta):
         :param row: the row to add to the table, in dict form
         :type row: dict[str, int | float | str | bytes]
         """
-        sub_marks = ','.join(['?'] * len(row))
-        query = 'INSERT INTO ? ({sub_marks}) VALUES ({sub_marks})'
-        query = query.format(sub_marks=sub_marks)
-        params = (self.table_name, *row.keys(), *row.values())
-        self.db.execute(query, params)
+        fields = ','.join(row.keys())
+        q_marks = ','.join(['?'] * len(row))
+        query = 'INSERT INTO {table} ({fields}) VALUES ({q_marks})'.format(
+            table=self.table_name, fields=fields, q_marks=q_marks
+        )
+        self.db.execute(query, (*row.values(),))
 
     def add_default(self):
         """Adds a row with default values into the table."""
-        self.db.execute('INSERT INTO ? DEFAULT VALUES', (self.table_name,))
+        query = 'INSERT INTO {table} DEFAULT VALUES'.format(
+            table=self.table_name
+        )
+        self.db.execute(query)
 
-    def update(self, field, value, key=primary_key):
+    def update(self, field, value, key=None):
         """Updates a row in the specified table in the database.
 
         :param field: `tuple` (name, value) pair for the updated field
@@ -156,10 +165,14 @@ class Table(metaclass=abc.ABCMeta):
         :type value: int | float | str | bytes
         :type key: str
         """
-        self.db.execute('UPDATE ? SET ? = ? WHERE ? = ?',
-                        (self.table_name, *field, key, value))
+        if not key:
+            key = self.primary_key
+        query = 'UPDATE {table} SET {field} = ? WHERE {key} = ?'.format(
+            table=self.table_name, field=field[0], key=key
+        )
+        self.db.execute(query, (field[1], value))
 
-    def update_from_form(self, form, value, key=primary_key):
+    def update_from_form(self, form, value, key=None):
         """Updates a row in the specified table using a POST request form.
 
         :param form: POST request form containing row data
@@ -170,12 +183,15 @@ class Table(metaclass=abc.ABCMeta):
         :type value: int | float | str | bytes
         :type key: str
         """
-        values = []
+        if not key:
+            key = self.primary_key
         for field, data in form.items():
-            values.append((self.table_name, field, data, key, value))
-        self.db.executemany('UPDATE ? SET ? = ? WHERE ? = ?', values)
+            query = 'UPDATE {table} SET {field} = ? WHERE {key} = ?'.format(
+                table=self.table_name, field=field, key=key
+            )
+            self.db.execute(query, (data, value))
 
-    def delete(self, value, key=primary_key):
+    def delete(self, value, key=None):
         """Deletes a row from the table.
 
         :param value: the key value of the row to delete
@@ -184,8 +200,9 @@ class Table(metaclass=abc.ABCMeta):
         :type value: int | float | str | bytes
         :type key: str
         """
-        self.db.execute('DELETE FROM ? WHERE ? = ?',
-                        (self.table_name, key, value))
-
-    def thing(self):
-        pass
+        if not key:
+            key = self.primary_key
+        query = 'DELETE FROM {table} WHERE {key} = ?'.format(
+            table=self.table_name, key=key
+        )
+        self.db.execute(query, (value,))
