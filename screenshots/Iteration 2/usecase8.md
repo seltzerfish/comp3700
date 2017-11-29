@@ -1,4 +1,4 @@
-# Use Case 7: View Sales Report
+# Use Case 8: View Sales Report
 
 Assume that we are already logged into the "admin" account, which is classified 
 as a manager. From the home screen, we click on "Sales Report"
