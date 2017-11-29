@@ -16,7 +16,7 @@ item_db = ItemDatabase('db/item_database.db')
 user_db = UserDatabase('db/user_database.db')
 
 session_opts = {
-    'session.cookie_expires': 300,
+    'session.cookie_expires': 3000,
     'session.encrypt_key': 'TEST KEY PLEASE IGNORE',
     'session.httponly': True,
     'session.timeout': 3600 * 24,  # 1 day
