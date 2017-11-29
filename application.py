@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 import io
+import locale
 import pickle
 from sqlite3 import DatabaseError
 
@@ -11,6 +12,8 @@ from random import choice
 
 from db_utils.items import ItemDatabase, Product, Order
 from db_utils.users import UserDatabase, User
+
+locale.setlocale(locale.LC_ALL, '')
 
 item_db = ItemDatabase('db/item_database.db')
 user_db = UserDatabase('db/user_database.db')
@@ -178,7 +181,7 @@ def add_order(order_id):
 @post('/add/product')
 def add_product():
     if request.method == 'POST':
-        product_table = user_db.table(Product)
+        product_table = item_db.table(Product)
         product_table.add(request.forms)
         redirect('/products')
     return template('add-product', sess=get_session())
@@ -207,6 +210,15 @@ def delete_product(product_id):
     product_table = item_db.table(Product)
     product_table.delete(product_id)
     redirect('/products')
+
+
+@route('/store_report', name='store_report')
+def store_report():
+    item_report = item_db.report()
+    total_revenue = item_db.total_revenue()
+    total_str = locale.currency(total_revenue)
+    return template('item_report', table=item_report, total=total_str,
+                    sess=get_session())
 
 
 @route('/denied', name='denied')

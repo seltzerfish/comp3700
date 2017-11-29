@@ -122,3 +122,27 @@ class ItemDatabase(SQLiteDatabase):
                  'JOIN Product ON Product.id = OrderLine.product_id '
                  'WHERE order_id = ? ORDER BY OrderLine.id')
         return self.fetchall(query, (order_id,))
+
+    def report(self):
+        """Fetches a report that contains all items sold.
+
+        :return: rows describing info about items sold
+        :rtype: List[sqlite3.Row]
+        """
+        query = ('SELECT Product.name AS name, sum(OrderLine.quantity) as sold,'
+                 '     sum(OrderLine.cost) AS revenue '
+                 'FROM OrderLine '
+                 'JOIN Product ON Product.id = OrderLine.product_id '
+                 'GROUP BY Product.name '
+                 'ORDER BY Product.id DESC')
+        return self.fetchall(query)
+
+    def total_revenue(self):
+        """Fetches the total revenue of all items sold.
+
+        :return: total item revenue
+        :rtype: float
+        """
+        query = 'SELECT sum(OrderLine.cost) AS total FROM OrderLine'
+        result = self.fetchone(query)
+        return result['total']

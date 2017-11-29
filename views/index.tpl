@@ -25,7 +25,7 @@
       <a class="button button-primary" href="/create_user">Create A New User</a>
     </div>
     <div class="six columns">
-      <a class="button button-primary" href="/">Sales Report</a>
+      <a class="button button-primary" href="/store_report">Sales Report</a>
     </div>
   </div>
   % else:
