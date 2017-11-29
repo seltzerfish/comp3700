@@ -44,10 +44,6 @@ def login_session(username):
     s['has_picture'] = user_row['Picture'] is not None
 
 
-def get_url(name):
-    return app.wrap_app.get_url(name)
-
-
 ###############################################################################
 # Routes ######################################################################
 ###############################################################################
@@ -60,7 +56,7 @@ def login():
         password = request.forms.get('password')
         if user_db.validate_login(username, password):
             login_session(username)
-            redirect(get_url('index'))
+            redirect('/')
         else:
             return template('invalid_login', sess=get_session())
     return template('login', sess=get_session())
@@ -107,7 +103,7 @@ def logout():
         del s['username']
         del s['permissions']
         del s['has_picture']
-    redirect(get_url('index'))
+    redirect('/')
 
 
 @route('/user/<username>', name='user_page')
@@ -119,7 +115,7 @@ def user(username):
 def admin():
     s = get_session()
     if not user_db.authorize(s['username']):
-        return redirect(get_url('denied'))
+        redirect('/denied')
     return {}  # TODO: Create admin page.
 
 
@@ -145,7 +141,7 @@ def create_user():
 def index():
     s = bottle.request.environ.get('beaker.session')
     if 'username' not in s:
-        redirect(get_url('login'))
+        redirect('/login')
     else:
         return template('index', sess=get_session())
 
@@ -184,7 +180,7 @@ def add_product():
     if request.method == 'POST':
         product_table = user_db.table(Product)
         product_table.add(request.forms)
-        redirect(get_url('products'))
+        redirect('/products')
     return template('add-product', sess=get_session())
 
 
@@ -201,7 +197,7 @@ def update_product(product_id):
     product_table = item_db.table(Product)
     if request.method == 'POST':
         product_table.update_from_form(request.forms, product_id)
-        redirect(get_url('products'))
+        redirect('/products')
     data = product_table.get(product_id)
     return template('update', item_data=data, sess=get_session())
 
@@ -210,7 +206,7 @@ def update_product(product_id):
 def delete_product(product_id):
     product_table = item_db.table(Product)
     product_table.delete(product_id)
-    redirect(get_url('products'))
+    redirect('/products')
 
 
 @route('/denied', name='denied')
