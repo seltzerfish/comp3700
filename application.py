@@ -1,4 +1,8 @@
 #!/usr/bin/env python
+import io
+import pickle
+from sqlite3 import DatabaseError
+
 import bottle
 from bottle import template, static_file, redirect, request, get, post, route
 from beaker.middleware import SessionMiddleware
@@ -23,76 +27,95 @@ session_opts = {
 app = SessionMiddleware(bottle.app(), session_opts)
 
 
+###############################################################################
+# Session Functions ###########################################################
+###############################################################################
+
 def get_session():
     return bottle.request.environ.get('beaker.session')
 
 
+def login_session(username):
+    s = get_session()
+    user_table = user_db.table(User)
+    user_row = user_table.get(username)
+    s['username'] = user_row['Username']
+    s['permissions'] = user_row['Permissions']
+    s['has_picture'] = user_row['Picture'] is not None
+
+
+###############################################################################
+# Routes ######################################################################
+###############################################################################
+
 @get('/login', name='login')
 @post('/login')
 def login():
-    s = get_session()
     if request.method == 'POST':
-        username = request.forms['username']
-        password = request.forms['password']
+        username = request.forms.get('username')
+        password = request.forms.get('password')
         if user_db.validate_login(username, password):
-            user = User(user_db).get(username)
-            s["username"] = username
-            s["permissions"] = user['Permissions']
-            redirect("/")
+            login_session(username)
+            redirect('/')
         else:
             return template('invalid_login', sess=get_session())
     return template('login', sess=get_session())
 
 
 @get('/update_profile/self')
-@post('/update_profile/self')
 def update_profile():
-    s = get_session()
-    if request.method == 'POST':
-        username = s["username"]
-        current_password = request.forms['current_password']
-        new_password = request.forms['new_password']
-        if (current_password and new_password and
-                user_db.validate_login(username, current_password)):
-            user_db.update_password(username, new_password)
-            return template('update_profile_success', sess=s)
-        else:
-            return template('update_profile_fail', sess=s)
     return template('update_profile', sess=get_session())
-
-
-@route('/logout', name='logout')
-def logout():
-    s = get_session()
-    if "username" in s:
-        del s["username"]
-        del s["permissions"]
-    redirect("/")
-
-
-@route('/user/<user_id:int>', name='user_page')
-def user(user_id):
-    return {}  # TODO: Create user page.
 
 
 @post('/change_password')
 def change_password():
     s = get_session()
     username = s['username']
-    password = request.forms['password']
-    user_db.update_password(username, password)
+    current_password = request.forms.get('current_password')
+    new_password = request.forms.get('new_password')
+    if user_db.validate_login(username, current_password):
+        user_db.update_password(username, new_password)
+        return template('update_profile', success=True, sess=s)
+    return template('update_profile', success=False, sess=s)
 
 
 @post('/change_picture')
 def change_picture():
-    pass  # TODO: Change profile picture.
+    s = get_session()
+    new_picture = request.files.get('picture')  # type: bottle.FileUpload
+    with new_picture.file as pic:
+        img_set = {'length': new_picture.content_length,
+                   'type': new_picture.content_type,
+                   'data': pic.read()}
+    img_data = pickle.dumps(img_set)
+    try:
+        user_db.update_picture(s['username'], img_data)
+    except DatabaseError:
+        return template('update_profile', success=False, sess=s)
+    s['has_picture'] = True
+    return template('update_profile', success=True, sess=s)
+
+
+@route('/logout', name='logout')
+def logout():
+    s = get_session()
+    if 'username' in s:
+        del s['username']
+        del s['permissions']
+        del s['has_picture']
+    redirect('/')
+
+
+@route('/user/<username>', name='user_page')
+def user(username):
+    return {}  # TODO: Create user page.
 
 
 @route('/admin', name='admin')
 def admin():
     s = get_session()
     if not user_db.authorize(s['username']):
-        return redirect('/sorry')
+        redirect('/denied')
     return {}  # TODO: Create admin page.
 
 
@@ -118,14 +141,14 @@ def create_user():
 def index():
     s = bottle.request.environ.get('beaker.session')
     if 'username' not in s:
-        redirect("/login")
+        redirect('/login')
     else:
         return template('index', sess=get_session())
 
 
 @route('/orders', name='order_list')
 def order_list():
-    table = Order(item_db).get_all(descending=True)
+    table = item_db.table(Order).get_all(descending=True)
     new_id = table[0]['id'] + 1
     return template('orders', table=table, new_id=new_id, sess=get_session())
 
@@ -139,9 +162,10 @@ def order_receipt(order_id):
 @get('/add/order/<order_id:int>', name='add_order')
 @post('/add/order/<order_id:int>')
 def add_order(order_id):
-    if not Order(item_db).get(order_id):
+    item_table = item_db.table(Order)
+    if not item_table.get(order_id):
         # Create order if it does not exist.
-        Order(item_db).add_default()
+        item_table.add_default()
     if request.method == 'POST':
         # Add item to order.
         result = item_db.add_by_form(request.forms, order_id)
@@ -154,41 +178,56 @@ def add_order(order_id):
 @post('/add/product')
 def add_product():
     if request.method == 'POST':
-        Product(item_db).add(request.forms)
+        product_table = user_db.table(Product)
+        product_table.add(request.forms)
         redirect('/products')
     return template('add-product', sess=get_session())
 
 
 @route('/products', name='product_list')
 def product_list():
-    table = Product(item_db).get_all()
+    product_table = item_db.table(Product)
+    table = product_table.get_all()
     return template('products', table=table, sess=get_session())
 
 
 @get('/update/<product_id:int>', name='update_product')
 @post('/update/<product_id:int>')
 def update_product(product_id):
+    product_table = item_db.table(Product)
     if request.method == 'POST':
-        Product(item_db).update_from_form(request.forms, product_id)
+        product_table.update_from_form(request.forms, product_id)
         redirect('/products')
-    data = Product(item_db).get(product_id)
+    data = product_table.get(product_id)
     return template('update', item_data=data, sess=get_session())
 
 
 @get('/delete/<product_id:int>', name='delete_product')
 def delete_product(product_id):
-    Product(item_db).delete(product_id)
+    product_table = item_db.table(Product)
+    product_table.delete(product_id)
     redirect('/products')
 
 
 @route('/denied', name='denied')
 def denied():
-    return {}  # TODO: Make "sorry, you're unauthorized" page.
+    return template('denied', sess=get_session())
 
 
-@route("/static/<file:path>")
+@route('/static/<file:path>')
 def send_static(file):
     return static_file(file, root='static/')
+
+
+@route('/profile/<username>/image')
+def send_profile_image(username):
+    user_table = user_db.table(User)
+    user_row = user_table.get(username)
+    img_data = user_row['Picture']
+    img_set = pickle.loads(img_data)  # type: dict
+    bottle.response.set_header('Content-Type', img_set.get('type'))
+    bottle.response.set_header('Content-Length', img_set.get('length'))
+    return io.BytesIO(img_set.get('data'))
 
 
 if __name__ == "__main__":

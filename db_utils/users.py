@@ -19,6 +19,16 @@ class User(Table):
         """
         self.update(('Password', password), username)
 
+    def update_picture(self, username, picture):
+        """Updates the 'Picture' field of a given user.
+
+        :param username: primary key of user to change picture
+        :param picture: new picture to upload
+        :type username: str
+        :type picture: bytes
+        """
+        self.update(('Picture', picture), username)
+
 
 class UserDatabase(SQLiteDatabase):
     """Controller for SQL user database."""
@@ -60,3 +70,6 @@ class UserDatabase(SQLiteDatabase):
 
     def update_password(self, username, password):
         User(self).update_password(username, password)
+
+    def update_picture(self, username, picture):
+        User(self).update_picture(username, picture)

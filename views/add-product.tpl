@@ -39,4 +39,4 @@
   </form>
 </div>
 % else:
- % include('wrong_permissions.tpl')
+ % include('denied.tpl')
